@@ -1,3 +1,9 @@
+######
+# This script is used to identify regions in a BED file which are nt covered at the required read depth
+# in a mpileup file. Any regions not covered 100% at the required depth are reported to fail.
+# A Jones 05/10/2020
+######
+
 import argparse
 import os
 import sys
@@ -6,7 +12,7 @@ def cli_arguments(args):
     """Parses command line arguments.
     Args:
         args: A list containing the expected commandline arguments. Example:
-            ['backup_runfolder.py', '-b', 'path/to/bedfile/', '-m',
+            ['mpileup_coverage.py', '-b', 'path/to/bedfile/', '-m',
              'path/to/mpileup/', '-o', '/path/to/output_file', '-c', '600']
     Returns:
         An argparse.parser object with methods named after long-option command-line arguments. Example:
@@ -74,9 +80,12 @@ def parse_mpileup(args,position_list):
 
 def region_coverage(region_dict, mpileup_list, args):
     """
-    This function loops through each region in the region_dict, and parses the mpileup_list, checking if the read depth at that base is below the minimum required coverage (provided argument).
-    It checks that the base is present in the mpileup file, if not it will mark it as having low coverage (in case the mpileup file was not run with -a)
-    A key pair is added to the amplicon dictionary in region_dict, recording a boolean denoting if the amplicon is not completely covered at the required depth (low_coverage)
+    This function loops through each region in the region_dict, and parses the mpileup_list, checking if the read depth at that base is
+    below the minimum required coverage (provided argument).
+    It checks that the base is present in the mpileup file, if not it will mark it as having low coverage (in case the mpileup file was 
+    not run with -a)
+    A key pair is added to the amplicon dictionary in region_dict, recording a boolean denoting if the amplicon is not completely covered
+    at the required depth (low_coverage)
     A count for the number of amplicons completely covered above the expected value, and those not covered completelyis added to region_dict.
     Input: 
         - command line arguments
@@ -92,9 +101,6 @@ def region_coverage(region_dict, mpileup_list, args):
         # set flags which can be changed to reflect an action.
         # low coverage is used to flag the amplicon if a base is found to be below the required cutoff.
         low_coverage = False
-        # all seen is a flag to ensure every base in the amplicon is assessed in the mpileup file. 
-        # if this is False, it can be used to override the low_coverage value to True
-        all_seen = True
         # take into account zero based, open ended BED file coordinates by adding one to start
         for base in range(region_dict[region]["start"]+1, region_dict[region]["stop"]):
             # set flag to check if the base is included in the mpileup file
@@ -104,7 +110,7 @@ def region_coverage(region_dict, mpileup_list, args):
                     seen = True
                     if mpileup_base[2] < int(args.coverage):
                         low_coverage = True
-            # if the base has not been seen after parsing the mpileup we can't pass the amplicon so set all_seen to false
+            # if the base has not been seen after parsing the mpileup we can't pass the amplicon so mark as low_coverage
             if not seen:
                 low_coverage = True
 
