@@ -13,4 +13,3 @@ The script parses through each region in the BED file, and then assesses the rep
 If a single base has coverage below the required level, or is missing from the mpileup file the amplicon will be marked as a fail.
 
 We have checked that softclipped bases are not counted by mpileup, so coverage will not be inflated by the primers of overlapping amplicons.
-
